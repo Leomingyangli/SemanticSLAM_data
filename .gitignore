@@ -1,0 +1,42 @@
+__pycache__/
+.vscode/
+old_data_raw/
+old_data_npz/
+old_data_pprc/
+data_raw/
+data_npz/
+data_pprc/
+printlog/
+sample*/
+*.log
+*.png
+*.pth
+yolov5/
+
+
+# image
+# *.png
+# gazebo
+# *.json
+
+
+# *symbolic/
+# *small/
+# *.npz
+
+# *yolo
+# *_image/
+# *_rgbd*/
+# *.log
+# *.zip
+# affineGrid.py
+# oldData/
+# oldProcessedData/
+# 2023_Apr25th_raw_data
+# *.pt
+# *.pth
+# *.npy
+# *.npz
+
+# sample*
+# Jul17th_YoloSegment
