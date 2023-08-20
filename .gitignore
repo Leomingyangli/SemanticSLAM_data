@@ -1,5 +1,5 @@
 __pycache__/
-.vscode/
+.vscode
 old_data_raw/
 old_data_npz/
 old_data_pprc/
