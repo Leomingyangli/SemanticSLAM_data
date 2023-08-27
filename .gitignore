@@ -12,7 +12,7 @@ sample*/
 *.png
 *.pth
 yolov5/
-
+*.sh
 
 # image
 # *.png

@@ -1,7 +1,7 @@
 import os,sys,copy,glob,time,math,torch,cv2,scipy.stats
 import numpy as np
 import matplotlib.pyplot as plt
-import open3d as o3d
+# import open3d as o3d
 from mpl_toolkits.mplot3d import Axes3D
 from scipy.ndimage import rotate
 import torch.nn.functional as F
@@ -38,6 +38,9 @@ np.set_printoptions(linewidth=10000,threshold=100000,precision=2,suppress=True)
 np.random.seed(0)
 
 def get_args():
+    new_directory = "/home/mli170/SLAM_PROJECT/SemanticSLAM_data"  # Replace this with the desired directory path
+    os.chdir(new_directory)
+
     parser = argparse.ArgumentParser()
     parser.add_argument('--date', type=str, default='Aug20th_ceil1floor02_resnet_scale3')   
     # parser.add_argument('--obs_case', type=str, default='perfect',help='perfect/perfect_obstructed/real')
@@ -65,12 +68,12 @@ def get_args():
     args.map_size *= args.map_scale
     args.obs_size *= args.map_scale
     
-    args.out_path = f'/data1/mli170/2022_Sep20th_dataset/Jul17th_YoloSegment/'
-    args.input_path = '2023_Jun19th_dataset_w_rgbd_raw_scale3_40objects'
+    args.out_path = f'data_npz'
+    args.input_path = 'data_raw/2023_Jun19th_dataset_w_rgbd_raw_scale3_40objects'
     args.input_folder = 'data_3_seg_resnet'
 
     print('''data_3_seg_resnet has 11layers. in layer[0] 1 is ground, all 0 is invisible area, and each entry of layer is percentage of pixels for that label 
-            Also, it contains low_level features from reset [position, ground_obs, ground_obs_semantic, ground_low_feature]''')
+            Also, it contains low_level features from reset [position, ground_obs, ground_obs_semantic, ground_low_feature(1,64,h,w)]''')
     today = date.today()
     print(today.strftime("%b-%d-%Y"))
     print(sys.argv)
@@ -339,9 +342,9 @@ class Observation_System():
                         # print(f'new observation: \n{_obs}')
                         # print(f'new observation_12layer_sum: \n{np.sum(_obs,axis=0)}')
                         '''Concatenate low-level feautre to ground obervation'''
-                        _obs = np.concatenate([_obs, data[i][3]]) #f+32,h,w
-                        real_obs.append(_obs) # L,f+1,H,W
-                        print(real_obs)
+                        _obs = np.concatenate([_obs, data[i][3][0]]) #f+1+32,h,w
+                        real_obs.append(_obs) # L,f+1+32,H,W
+
                         # real_abs_obs.append(np.array(data[i][1])) # L,H,W
                         
                     #     pose = data[i][0]
@@ -384,7 +387,7 @@ class Observation_System():
 
                         real_observation_semantic = obs_all[b][l] #(1+f,h,w)
                         
-                        perfect_obstructed_observation_semantic = perfect_observation_semantic * real_observation_semantic[1:].astype(bool)
+                        perfect_obstructed_observation_semantic = perfect_observation_semantic * real_observation_semantic[1:12].astype(bool)
 
                         # invisible layer
                         perfect_unobserved_mask = (1 - (np.sum(perfect_observation_semantic, axis=0) > 0)).astype(np.int16)[np.newaxis,...] # (1,H,W)
@@ -441,9 +444,9 @@ class Observation_System():
                 scene_all     = np.array(env_all) if len(scene_all)==0 else np.concatenate((scene_all,np.array(env_all)),axis=0) #env information: (b,h,w)
                 scene_semantic_all = np.array(env_seman_all) if len(scene_semantic_all)==0 else np.concatenate((scene_semantic_all,np.array(env_seman_all)),axis=0) #maps: (b,cls,h,w)
             print(f'pose_file_all:\n{pose_file_all.shape}')
-            # print(f'obs_file_all:\n{obs_file_all.shape}\nobs_file_abst_all:\n{obs_file_abst_all.shape}')
-            print(f'obs_file_all obs_obst_file_all obs_perf_file_all:\n{obs_file_all.shape}{obs_obst_file_all.shape}{obs_perf_file_all.shape}\n')
-            print(f'map_file_all map_obst_file_all map_perf_file_all:\n{map_file_all.shape}{map_obst_file_all.shape}{map_perf_file_all.shape}\n')
+            print(f'obs_file_all:\n{obs_file_all.shape}\nmap_file_all:\n{map_file_all.shape}')
+            # print(f'obs_file_all obs_obst_file_all obs_perf_file_all:\n{obs_file_all.shape}{obs_obst_file_all.shape}{obs_perf_file_all.shape}\n')
+            # print(f'map_file_all map_obst_file_all map_perf_file_all:\n{map_file_all.shape}{map_obst_file_all.shape}{map_perf_file_all.shape}\n')
             print(f'scene_all:\n{scene_all.shape}\nscene_semantic_all:\n{scene_semantic_all.shape}')
             for i in range(30):
                 print(f'step:{i}')
@@ -455,11 +458,11 @@ class Observation_System():
                 # print(f'perf_map-real_map:\n{map_perf_file_all[i,0,2:5]-map_file_all[i,0,2:5]}')
                 print(f'pose_file_all:\n{pose_file_all[i,0]}')
                 print(f'obs_file_all:\n{obs_file_all[i,0,:3]}')
-                print(f'obs_obst_file_all:\n{obs_obst_file_all[i,0,:3]}')
-                print(f'obs_perf_file_all:\n{obs_perf_file_all[i,0,:3]}')
+                # print(f'obs_obst_file_all:\n{obs_obst_file_all[i,0,:3]}')
+                # print(f'obs_perf_file_all:\n{obs_perf_file_all[i,0,:3]}')
                 print(f'map_file_all:\n{map_file_all[i,0,:3]}')
-                print(f'map_obst_file_all:\n{map_obst_file_all[i,0,:3]}')
-                print(f'map_perf_file_all:\n{map_perf_file_all[i,0,:3]}')
+                # print(f'map_obst_file_all:\n{map_obst_file_all[i,0,:3]}')
+                # print(f'map_perf_file_all:\n{map_perf_file_all[i,0,:3]}')
                 print(f'scene_all:\n{scene_all[0]}')
                 print(f'scene_semantic_all:\n{scene_semantic_all[0]}')
             
@@ -473,7 +476,8 @@ class Observation_System():
             # mean = torch.mean(torch.stack(mean,dim=0),0)
             # std = torch.mean(torch.stack(std,dim=0),0)
             # print(f'image_mean:{mean}\t image_std:{std}')
-            return image_file_all, depth_file_all, [obs_file_all, obs_obst_file_all, obs_perf_file_all], pose_file_all, [map_file_all,map_obst_file_all,map_perf_file_all], scene_all, scene_semantic_all
+            return image_file_all, depth_file_all, obs_file_all, pose_file_all, map_file_all, scene_all, scene_semantic_all
+            # return image_file_all, depth_file_all, [obs_file_all, obs_obst_file_all, obs_perf_file_all], pose_file_all, [map_file_all,map_obst_file_all,map_perf_file_all], scene_all, scene_semantic_all
        
        #========================Training and testing on different env==========================
         print('='*20,'Training and testing on different env', '='*20,'\n')
@@ -481,7 +485,8 @@ class Observation_System():
         img, dep, obs, pos, maps, env_maps, env_smaps = gen(1,self.args.train_env)
         # print(f'img:{img.shape}, \ndep:{dep.shape}, \nobs:{obs.shape}, \npos:{pos.shape}, \nmaps:{maps.shape}, \nenv_maps:{env_maps.shape}, \nenv_smaps:{env_smaps.shape}')
         np.savez(f'{self.args.out_path}/Gazebo_{self.args.date}_CrossScene_map{self.args.map_size}_obj{self.args.n_object}_len{self.args.tra_len}_train',
-            rgb=img, depth=dep, image_cls=obs[0], image_cls_obst=obs[1],image_cls_perf=obs[2], delta=pos, maps=maps[0],maps_obst=maps[1],maps_perf=maps[2], map_labl=env_maps, map_cls_labl=env_smaps)
+            rgb=img, depth=dep, image_cls=obs, image_cls_obst=obs, delta=pos, maps=maps, map_labl=env_maps, map_cls_labl=env_smaps)
+            # rgb=img, depth=dep, image_cls=obs[0], image_cls_obst=obs[1],image_cls_perf=obs[2], delta=pos, maps=maps[0],maps_obst=maps[1],maps_perf=maps[2], map_labl=env_maps, map_cls_labl=env_smaps)
 
         print('-'*20,'testing ', '-'*20,'\n')
         print('-'*20,f'Env index {self.args.train_env+1}-{self.args.env_ctr}', '-'*20,'\n')
@@ -490,7 +495,8 @@ class Observation_System():
         remainder = self.args.env_ctr - self.args.train_env 
         # print(f'img:{img.shape}, \ndep:{dep.shape}, \nobs:{obs.shape}, \npos:{pos.shape}, \nmaps:{maps.shape}, \nenv_maps:{env_maps.shape}, \nenv_smaps:{env_smaps.shape}\n')
         np.savez(f'{self.args.out_path}/Gazebo_{self.args.date}_CrossScene_map{self.args.map_size}_obj{self.args.n_object}_len{self.args.tra_len}_test',
-            rgb=img, depth=dep, image_cls=obs[0], image_cls_obst=obs[1],image_cls_perf=obs[2], delta=pos, maps=maps[0],maps_obst=maps[1],maps_perf=maps[2], map_labl=env_maps, map_cls_labl=env_smaps)
+            rgb=img, depth=dep, image_cls=obs, image_cls_obst=obs, delta=pos, maps=maps, map_labl=env_maps, map_cls_labl=env_smaps)
+            # rgb=img, depth=dep, image_cls=obs[0], image_cls_obst=obs[1],image_cls_perf=obs[2], delta=pos, maps=maps[0],maps_obst=maps[1],maps_perf=maps[2], map_labl=env_maps, map_cls_labl=env_smaps)
 
         #========================Training and testing on same env==========================
         print('\n','='*20,'Training and testing on same env but different trajecotry', '='*20)
@@ -504,15 +510,19 @@ class Observation_System():
         #     # image_cls=obs, delta=pos, maps=maps, map_labl=env_maps, map_cls_labl=env_smaps)
         np.savez(f'{self.args.out_path}/Gazebo_{self.args.date}_IntraScene_map{self.args.map_size}_obj{self.args.n_object}_len{self.args.tra_len}_train',
             rgb=img, depth=dep, 
-            image_cls=obs[0][:,train_index,...],image_cls_obst=obs[1][:,train_index,...],image_cls_perf=obs[2][:,train_index,...], 
+            image_cls=obs[:,train_index,...], 
+            # image_cls=obs[0][:,train_index,...],image_cls_obst=obs[1][:,train_index,...],image_cls_perf=obs[2][:,train_index,...], 
             delta=pos[:,train_index,...], 
-            maps=maps[0][:,train_index,...],maps_obst=maps[1][:,train_index,...],maps_perf=maps[2][:,train_index,...], 
+            maps=maps[:,train_index,...], 
+            # maps=maps[0][:,train_index,...],maps_obst=maps[1][:,train_index,...],maps_perf=maps[2][:,train_index,...], 
             map_labl=env_maps[train_index,...], map_cls_labl=env_smaps[train_index,...])
         np.savez(f'{self.args.out_path}/Gazebo_{self.args.date}_IntraScene_map{self.args.map_size}_obj{self.args.n_object}_len{self.args.tra_len}_test',
             rgb=img, depth=dep, 
-            image_cls=obs[0][:,test_index,...],image_cls_obst=obs[1][:,test_index,...],image_cls_perf=obs[2][:,test_index,...], 
+            image_cls=obs[:,test_index,...], 
+            # image_cls=obs[0][:,test_index,...],image_cls_obst=obs[1][:,test_index,...],image_cls_perf=obs[2][:,test_index,...], 
             delta=pos[:,test_index,...], 
-            maps=maps[0][:,test_index,...],maps_obst=maps[1][:,test_index,...],maps_perf=maps[2][:,test_index,...], 
+            maps=maps[:,test_index,...], 
+            # maps=maps[0][:,test_index,...],maps_obst=maps[1][:,test_index,...],maps_perf=maps[2][:,test_index,...], 
             map_labl=env_maps[test_index,...], map_cls_labl=env_smaps[test_index,...])
         # print('\n','-'*30,'Sample', '-'*30)
         # print(f'pose:{pos[0,0]}\n\nobs:\n{obs[0,0]}\nmap:\n{maps[0,0]}\nenvironment:\n{env_maps[0]}')
