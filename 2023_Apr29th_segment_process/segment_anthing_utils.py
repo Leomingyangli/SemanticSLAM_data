@@ -2,7 +2,7 @@ import os
 os.environ["CUDA_VISIBLE_DEVICES"]="0"
 from segment_anything import SamPredictor, SamAutomaticMaskGenerator, sam_model_registry
 import numpy as np
-import cv2
+# import cv2
 import matplotlib.pyplot as plt
 import torch
 '''

@@ -1,8 +1,8 @@
-import os,sys,cv2,torch
+import os,sys,torch
 import numpy as np
-import open3d as o3d
+# import open3d as o3d
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
+# from mpl_toolkits.mplot3d import Axes3D
 
 class Parameters():
     def __init__(self):
@@ -12,7 +12,7 @@ class Parameters():
         self.previous_pose = [10,10]
         self.candidate = 1
         self.init_step = -1
-        self.grid_unit = 1/5
+        self.grid_unit = 1/3
         self.grid_count = int(1 /self.grid_unit)
         self.feature_unit = 1
         #

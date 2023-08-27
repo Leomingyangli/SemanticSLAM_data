@@ -1,12 +1,14 @@
-import os,sys,copy,glob,time,math,torch,cv2,scipy.stats,json
+import os,sys,copy,glob,time,math,torch,scipy.stats,json
 import numpy as np
 import matplotlib.pyplot as plt
-import open3d as o3d
-# from mpl_toolkits.mplot3d import Axes3D
-from scipy.ndimage import rotate
 import torch.nn.functional as F
+from scipy.ndimage import rotate
 from einops import rearrange, reduce, asnumpy, parse_shape
-from tqdm import trange
+# import open3d as o3d
+# from mpl_toolkits.mplot3d import Axes3D
+# from tqdm import trange
+
+
 
 from parameters import Parameters
 from segment_anthing_utils import show_mask,show_box
@@ -64,9 +66,9 @@ class Observation_System():
     def rotate_3D(self,observation,degree,cut):
         for i in range(len(observation)):
             observation_temp = rotate(observation[i], angle=degree,order=1,mode='constant')
-            index_new = [int(len(observation_temp)/2),int(len(observation_temp[0])/2)]
-            observation_temp = self.center_observation(observation_temp,index_new,self.p.half_local_map_size,self.p.half_local_map_size)
-            observation_temp = self.cut_observation(observation_temp) if cut else observation_temp
+            # index_new = [int(len(observation_temp)/2),int(len(observation_temp[0])/2)]
+            # observation_temp = self.center_observation(observation_temp,index_new,self.p.half_local_map_size,self.p.half_local_map_size)
+            # observation_temp = self.cut_observation(observation_temp) if cut else observation_temp
             observation[i] = observation_temp
         return observation
 
@@ -197,8 +199,8 @@ class Observation_System():
         label_map = {'1':1,'2':7,'3':8,'4':9,'5':10,'6':2,'7':3,'8':4,'9':5,'10':6}
 
         # ------------get rgbd image and initialize ground observations-----------------
-        image = cv2.cvtColor(image.astype(np.uint8), cv2.COLOR_BGR2RGB)
-        pointcloud = pointcloud.reshape(image.shape)
+        # image = cv2.cvtColor(image.astype(np.uint8), cv2.COLOR_BGR2RGB)
+        # pointcloud = pointcloud.reshape(image.shape)
         observation = np.zeros((self.p.local_map_size,self.p.local_map_size))
         # print(f'Initializing: observation:{observation.shape}')
 
@@ -236,19 +238,19 @@ class Observation_System():
         masks = masks.squeeze(1).cpu().numpy()
 
         '''Sample images output'''
-        plt.figure(figsize=(10, 10))
-        position[2] = np.rad2deg(position[2])
-        plt.title(f'step:{self.ctr} pose_x:{position[0]:.2f} y:{position[1]:.2f} yaw:{position[2]:.2f}',fontsize=20)
-        plt.imshow(image)
-        for i,mask in enumerate(masks):
-            show_mask(mask, plt.gca(), random_color=True)
-        for input_box in input_boxes:
-            show_box(input_box.cpu().numpy(), plt.gca())
-        plt.axis('off')
-        plt.savefig(f'sample_image_Jun19th/{self.ctr}.png')
-        self.ctr += 1
-        plt.clf()
-        plt.close()
+        # plt.figure(figsize=(10, 10))
+        # position[2] = np.rad2deg(position[2])
+        # plt.title(f'step:{self.ctr} pose_x:{position[0]:.2f} y:{position[1]:.2f} yaw:{position[2]:.2f}',fontsize=20)
+        # plt.imshow(image)
+        # for i,mask in enumerate(masks):
+        #     show_mask(mask, plt.gca(), random_color=True)
+        # for input_box in input_boxes:
+        #     show_box(input_box.cpu().numpy(), plt.gca())
+        # plt.axis('off')
+        # plt.savefig(f'sample_image_Aug21th/{self.ctr}.png')
+        # self.ctr += 1
+        # plt.clf()
+        # plt.close()
         # return False, None, None
 
         # print(f'labels:{len(labels)}{labels}')
