@@ -56,13 +56,10 @@ torch.backends.cudnn.benchmark = False
 torch.backends.cudnn.deterministic = True
 
 def get_args():
+    new_directory = "/home/mli170/SLAM_PROJECT/SemanticSLAM_data"  # Replace this with the desired directory path
+    os.chdir(new_directory)
     parser = argparse.ArgumentParser()
-    # parser.add_argument('--date', type=str, default='Jul19th_real_origin_CrossScene')  
-    # parser.add_argument('--date', type=str, default='Jul19th_real_origin_IntraScene')  
-    # parser.add_argument('--date', type=str, default='Jul19th_real_softmax15_CrossScene')  
-    # parser.add_argument('--date', type=str, default='Jul19th_real_softmax15_IntraScene')  
-    # parser.add_argument('--date', type=str, default='Jul19th_real_002ceil1floor0_CrossScene')  
-    parser.add_argument('--date', type=str, default='Jul19th_real_002ceil1floor0_CrossScene_addStart')  
+    parser.add_argument('--date', type=str, default='Aug20th_ceil1floor02_resnet_CrossScene_addStart')  
     parser.add_argument('--map_size', type=int, default=11,help='The size of environment')
     parser.add_argument('--obs_size', type=int, default=11,help='The size of environment')
     parser.add_argument('--n_object', type=int, default=41,help='Item quantities')
@@ -83,7 +80,8 @@ def get_args():
     # args.output_folder = 'May6th_YoloSegment'
     # args.output_folder = 'Apr15th_realYolo'
     # args.output_folder = 'Jun6th_YoloSegment'
-    args.output_folder = 'Jul17th_YoloSegment'
+    args.input_folder = 'data_raw'
+    args.output_folder = 'data_pprc'
 
     args.map_size *= int(args.map_scale)
     args.obs_size *= int(args.obs_size)
@@ -91,68 +89,13 @@ def get_args():
     args.map_shape = (args.feature_dim, args.map_size, args.map_size)
     args.angles = np.radians(np.linspace(0, int(360-args.angles_intvl), int(360//args.angles_intvl)))
     args.map_config = [args.map_shape,args.map_scale,args.angles]
-    
-    # args.train_path = f'{args.output_folder}/Gazebo_Jun19th_real_unfrmLayers_26of30env_map33_obj40_len80_train.npz'
-    # args.val_path = f'{args.output_folder}/Gazebo_Jun19th_real_unfrmLayers_4of30env_map33_obj40_len80_test.npz'
-    # args.train_path = f'{args.output_folder}/Gazebo_Jul17th_real_origin_12Layers_IntraScene_map33_obj40_len80_train.npz'
-    # args.val_path = f'{args.output_folder}/Gazebo_Jul17th_real_origin_12Layers_IntraScene_map33_obj40_len80_test.npz'
-    # args.train_path = f'{args.output_folder}/Gazebo_Jul17th_real_origin_12Layers_CrossScene_map33_obj40_len80_train.npz'
-    # args.val_path = f'{args.output_folder}/Gazebo_Jul17th_real_origin_12Layers_CrossScene_map33_obj40_len80_test.npz'
 
-    # args.train_path = f'{args.output_folder}/Gazebo_Jul17th_real_softmax15_12Layers_IntraScene_map33_obj40_len80_train.npz'
-    # args.val_path = f'{args.output_folder}/Gazebo_Jul17th_real_softmax15_12Layers_IntraScene_map33_obj40_len80_test.npz'
-    # args.train_path = f'{args.output_folder}/Gazebo_Jul17th_real_softmax15_12Layers_CrossScene_map33_obj40_len80_train.npz'
-    # args.val_path = f'{args.output_folder}/Gazebo_Jul17th_real_softmax15_12Layers_CrossScene_map33_obj40_len80_test.npz'
+    args.train_path = f'{args.input_folder}/Gazebo_Aug20th_ceil1floor02_resnet_scale3_CrossScene_map33_obj40_len80_train.npz'
+    args.val_path = f'{args.input_folder}/Gazebo_Aug20th_ceil1floor02_resnet_scale3_CrossScene_map33_obj40_len80_test.npz'
 
-    # args.train_path = f'{args.output_folder}/Gazebo_Jul17th_real_002ceil1floor0_12Layers_IntraScene_map33_obj40_len80_train.npz'
-    # args.val_path = f'{args.output_folder}/Gazebo_Jul17th_real_002ceil1floor0_12Layers_IntraScene_map33_obj40_len80_test.npz'
-    args.train_path = f'{args.output_folder}/Gazebo_Jul17th_real_002ceil1floor0_12Layers_CrossScene_map33_obj40_len80_train.npz'
-    args.val_path = f'{args.output_folder}/Gazebo_Jul17th_real_002ceil1floor0_12Layers_CrossScene_map33_obj40_len80_test.npz'
-    # args.train_path = f'{args.output_folder}/Gazebo_Jul25th_real_002ceil1floor0_12Layers_scale5_realmap_CrossScene_map55_obj40_len80_train.npz'
-    # args.val_path = f'{args.output_folder}/Gazebo_Jul25th_real_002ceil1floor0_12Layers_scale5_realmap_CrossScene_map55_obj40_len80_test.npz'
-
-    # args.train_path = f'{args.output_folder}/baseline_real_ceilfloor/Gazebo_Jul17th_real_002ceil1floor0_12Layers_rgbd_IntraScene_map33_obj40_len80_train.npz'
-    # args.val_path = f'{args.output_folder}/baseline_real_ceilfloor/Gazebo_Jul17th_real_002ceil1floor0_12Layers_rgbd_IntraScene_map33_obj40_len80_test.npz'
-    # args.train_path = f'{args.output_folder}/baseline_real_ceilfloor/Gazebo_Jul17th_real_002ceil1floor0_12Layers_rgbd_CrossScene_map33_obj40_len80_train.npz'
-    # args.val_path = f'{args.output_folder}/baseline_real_ceilfloor/Gazebo_Jul17th_real_002ceil1floor0_12Layers_rgbd_CrossScene_map33_obj40_len80_test.npz'
-
-
-    # args.train_path = f'{args.output_folder}/Gazebo_Jun19th_real_12layers_multiSessionEnv_map33_obj40_len62_train.npz'
-    # args.val_path = f'{args.output_folder}/Gazebo_Jun19th_real_12layers_multiSessionEnv_map33_obj40_len62_test.npz'
-    # args.train_path = f'{args.output_folder}/Gazebo_Jun19th_real_12layers_26of30env_map33_obj40_len62_train.npz'
-    # args.val_path = f'{args.output_folder}/Gazebo_Jun19th_real_12layers_4of30env_map33_obj40_len62_test.npz'
-    # args.train_path = f'{args.output_folder}/Gazebo_Jun6th_real_scale3_28of30env_map33_obj21_len62_wo_rgbd_train_small.npz'
-    # args.val_path = f'{args.output_folder}/Gazebo_Jun6th_real_scale3_2of30env_map33_obj21_len62_wo_rgbd_test_small.npz'
-    # args.train_path = f'{args.output_folder}/Gazebo_Jun6th_perfect_realObs_scale3_28of30env_map33_obj21_len51_train.npz'
-    # args.val_path = f'{args.output_folder}/Gazebo_Jun6th_perfect_realObs_scale3_2of30env_map33_obj21_len51_test.npz'
-    # args.train_path = f'{args.output_folder}/Gazebo_Jun6th_perfect_obstrcutedObs_scale3_28of30env_map33_obj21_len51_train.npz'
-    # args.val_path = f'{args.output_folder}/Gazebo_Jun6th_perfect_obstrcutedObs_scale3_2of30env_map33_obj21_len51_test.npz'
-    # args.train_path = f'{args.output_folder}/Gazebo_Jun6th_perfect_scale3_28of30env_map33_obj21_len62_train.npz'
-    # args.val_path = f'{args.output_folder}/Gazebo_Jun6th_perfect_scale3_2of30env_map33_obj21_len62_test.npz'
-    # args.train_path = f'{args.output_folder}/Gazebo_Jun6th_real_floor002_scale3_28of30env_map33_obj21_len62_wo_rgbd_train_small.npz'
-    # args.val_path = f'{args.output_folder}/Gazebo_Jun6th_real_floor002_scale3_2of30env_map33_obj21_len62_wo_rgbd_test_small.npz'
-
-    # args.train_path = 'Gazebo_Feb15th_whiteYolo_scale3_28of30env_map33_obj21_len40_wo_rgbd_train_small.npz'
-    # args.val_path = 'Gazebo_Feb15th_whiteYolo_scale3_2of30env_map33_obj21_len40_wo_rgbd_test_small.npz'
-    # args.train_path = 'Gazebo_Apr15th_realYolo_scale3_28of30env_map33_obj21_len40_wo_rgbd_train_small.npz'
-    # args.val_path = 'Gazebo_Apr15th_realYolo_scale3_2of30env_map33_obj21_len40_wo_rgbd_test_small.npz'
-
-    # args.train_path = 'Gazebo_Apr15th_realYolo_scale3_28of30env_map33_obj21_len62_wo_rgbd_train_small.npz'
-    # args.val_path = 'Gazebo_Apr15th_realYolo_scale3_2of30env_map33_obj21_len62_wo_rgbd_test_small.npz'
-    
-    # args.train_path = 'Gazebo_Apr30th_YoloSegment_scale3_28of30env_map33_obj21_len40_wo_rgbd_train_small.npz'
-    # args.val_path = 'Gazebo_Apr30th_YoloSegment_scale3_2of30env_map33_obj21_len40_wo_rgbd_test_small.npz'
-    
-    # args.train_path = 'Gazebo_May6th_YoloSegment_ceilfloor01_28of30env_map33_obj21_len40_wo_rgbd_train_small.npz'
-    # args.val_path = 'Gazebo_May6th_YoloSegment_ceilfloor01_2of30env_map33_obj21_len40_wo_rgbd_test_small.npz'
-
-    # args.train_path = 'Gazebo_Apr30th_YoloSegment_scale1_28of30env_map11_obj21_len40_wo_rgbd_train_small.npz'
-    # args.val_path = 'Gazebo_Apr30th_YoloSegment_scale1_2of30env_map11_obj21_len40_wo_rgbd_test_small.npz'
-    # args.train_path = 'Gazebo_Apr15th_perfectYolo_scale3_28of30env_map33_obj21_len40_train.npz'
-    # args.val_path = 'Gazebo_Apr15th_perfectYolo_scale3_2of30env_map33_obj21_len40_test.npz'
 
     # args.out_path = f'/data1/mli170/2022_Sep20th_dataset/{args.output_folder}/{args.date}_m{args.map_size}obj{args.n_object}len{args.num_steps}angl{args.angles_intvl}/semantic'
-    args.out_path = f'/data1/mli170/2022_Sep20th_dataset/{args.output_folder}/{args.date}_m{args.map_size}obj{args.n_object}len{args.num_steps}angl{args.angles_intvl}/semantic'
+    args.out_path = f'{args.output_folder}/{args.date}_m{args.map_size}obj{args.n_object}len{args.num_steps}angl{args.angles_intvl}/semantic'
     today = date.today()
     print(today.strftime("%b-%d-%Y"))
     print(sys.argv)
