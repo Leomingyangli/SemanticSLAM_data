@@ -39,7 +39,7 @@ np.random.seed(0)
 
 def get_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--date', type=str, default='Jul25th_real_002ceil1floor0_12Layers_scale5_realmap')   
+    parser.add_argument('--date', type=str, default='Aug20th_ceil1floor02_resnet_scale3')   
     # parser.add_argument('--obs_case', type=str, default='perfect',help='perfect/perfect_obstructed/real')
     parser.add_argument('--prj_up', type=bool, default=True)
     parser.add_argument('--prj_down', type=bool, default=True)
@@ -48,7 +48,7 @@ def get_args():
     parser.add_argument('--temperature', type=float, default=15,help='temperature of softmax')
 
     parser.add_argument('--map_size', type=int, default=11,help='The size of environment')
-    parser.add_argument('--map_scale', type=int, default=5,help='The scale of unit, 1meter can be devided by 3 units')
+    parser.add_argument('--map_scale', type=int, default=3,help='The scale of unit, 1meter can be devided by 3 units')
     parser.add_argument('--obs_size', type=int, default=11,help='The size of environment')
     # parser.add_argument('--obs_threshold', type=float, default=0.5,help='threshold for valid observation')
     parser.add_argument('--n_object', type=int, default=40,help='Item quantities')
@@ -66,16 +66,11 @@ def get_args():
     args.obs_size *= args.map_scale
     
     args.out_path = f'/data1/mli170/2022_Sep20th_dataset/Jul17th_YoloSegment/'
-    # args.input_path = f'/data/mli170/2022_{args.date}_dataset/m{args.map_size}env{args.env_ctr}tra{args.tra_ctr}step{args.tra_len}'
-    # args.input_path = '2023_Feb15th_dataset_w_rgbd_whiteFiltered_scale3'
-    # args.input_path = '2023_Feb15th_dataset_w_rgbd_raw_scale3'
-    # args.input_path = '2023_Apr29th_dataset_w_rgbd_raw_scale3'
     args.input_path = '2023_Jun19th_dataset_w_rgbd_raw_scale3_40objects'
-    # args.input_folder = 'data_3_seg'
-    # args.input_folder = 'data_3'
-    # args.input_folder = 'data_3_seg_ground0'
-    args.input_folder = 'data_5_seg_ground1'
-    print(f'data_3_seg_ground1 has 11layers. in layer[0] 1 is ground, all 0 is invisible area, and each entry of layer is percentage of pixels for that label')
+    args.input_folder = 'data_3_seg_resnet'
+
+    print('''data_3_seg_resnet has 11layers. in layer[0] 1 is ground, all 0 is invisible area, and each entry of layer is percentage of pixels for that label 
+            Also, it contains low_level features from reset [position, ground_obs, ground_obs_semantic, ground_low_feature]''')
     today = date.today()
     print(today.strftime("%b-%d-%Y"))
     print(sys.argv)
@@ -271,27 +266,26 @@ class Observation_System():
                 pose_all,obs_abst_all,env_all,env_seman_all=[],[],[],[]
                 obs_all, obs_perf_all, obs_obst_all = [], [], []
                 item_obs_all = []
-                image_all = []
-                depth_all = []
+                image_all, depth_all = [], []
+
                 #get pose of one env
                 env_map = copy.deepcopy(np.load(f'{self.args.input_path}/slam_{j}/label.npy',allow_pickle=True)) #h,w
                 env_map =  F.interpolate(torch.tensor(env_map)[None,None,],scale_factor=self.args.map_scale,mode='nearest')[0,0].numpy()
                 # print(f'Read map information:\n{env_map}')
 
                 for k in range(1, 1 + self.args.tra_ctr):
-                    rgbdata = np.load(f'{self.args.input_path}/slam_{j}/raw/{k}.npy',allow_pickle=True,encoding='bytes') #(L,3)
+                    # rgbdata = np.load(f'{self.args.input_path}/slam_{j}/raw/{k}.npy',allow_pickle=True,encoding='bytes') #(L,3)
                     data = np.load(f'{self.args.input_path}/slam_{j}/{self.args.input_folder}/{k}.npy',allow_pickle=True) #(L,3)
                     # [step][pose,rgb,d]
                     # rgbd = np.load(f'{self.args.input_path}/slam_{j}/camera/{k}.npy',allow_pickle=True) #(L,3) RGB
                     images = []
                     depths = []
-                    print(rgbdata.shape)
-                    return
-                    for jj in rgbdata:
-                        image = jj[1].astype(np.int32)
-                        pointcloud = jj[2].astype(np.float64).reshape(image.shape)
-                        images.append(image[::4,::4,:])
-                        depths.append(pointcloud[::4,::4,:])
+                    # print(rgbdata.shape)
+                    # for jj in rgbdata:
+                    #     image = jj[1].astype(np.int32)
+                    #     pointcloud = jj[2].astype(np.float64).reshape(image.shape)
+                    #     images.append(image[::4,::4,:])
+                    #     depths.append(pointcloud[::4,::4,:])
 
                     # # for jj in range(1, self.args.tra_len+1):
                     # #     image = np.array(cv2.imread(f'{self.args.input_path}/slam_{j}/image/{k}/{jj}.png')) #(h,w,3) BGR
@@ -342,10 +336,12 @@ class Observation_System():
                         else:
                             unobserved_layer = np.ones((self.args.feature_dim, _obs.shape[1], _obs.shape[2]), dtype=np.float32) / self.args.feature_dim # (f,H,W)
                             _obs += unobserved_layer * unobserved_mask
-                        
                         # print(f'new observation: \n{_obs}')
                         # print(f'new observation_12layer_sum: \n{np.sum(_obs,axis=0)}')
+                        '''Concatenate low-level feautre to ground obervation'''
+                        _obs = np.concatenate([_obs, data[i][3]]) #f+32,h,w
                         real_obs.append(_obs) # L,f+1,H,W
+                        print(real_obs)
                         # real_abs_obs.append(np.array(data[i][1])) # L,H,W
                         
                     #     pose = data[i][0]
