@@ -2,7 +2,7 @@ import os,sys,copy,glob,time,math,torch,cv2,scipy.stats
 import numpy as np
 import matplotlib.pyplot as plt
 import torch
-import open3d as o3d
+# import open3d as o3d
 from mpl_toolkits.mplot3d import Axes3D
 from scipy.ndimage import rotate
 import torch.nn.functional as F
@@ -59,7 +59,7 @@ def get_args():
     new_directory = "/home/mli170/SLAM_PROJECT/SemanticSLAM_data"  # Replace this with the desired directory path
     os.chdir(new_directory)
     parser = argparse.ArgumentParser()
-    parser.add_argument('--date', type=str, default='Aug20th_ceil1floor02_resnet_CrossScene_addStart')  
+    parser.add_argument('--date', type=str, default='Aug20th_ceil1floor02_resnet_IntraScene_addStart')  
     parser.add_argument('--map_size', type=int, default=11,help='The size of environment')
     parser.add_argument('--obs_size', type=int, default=11,help='The size of environment')
     parser.add_argument('--n_object', type=int, default=41,help='Item quantities')
@@ -80,7 +80,7 @@ def get_args():
     # args.output_folder = 'May6th_YoloSegment'
     # args.output_folder = 'Apr15th_realYolo'
     # args.output_folder = 'Jun6th_YoloSegment'
-    args.input_folder = 'data_raw'
+    args.input_folder = 'data_npz'
     args.output_folder = 'data_pprc'
 
     args.map_size *= int(args.map_scale)
@@ -90,8 +90,10 @@ def get_args():
     args.angles = np.radians(np.linspace(0, int(360-args.angles_intvl), int(360//args.angles_intvl)))
     args.map_config = [args.map_shape,args.map_scale,args.angles]
 
-    args.train_path = f'{args.input_folder}/Gazebo_Aug20th_ceil1floor02_resnet_scale3_CrossScene_map33_obj40_len80_train.npz'
-    args.val_path = f'{args.input_folder}/Gazebo_Aug20th_ceil1floor02_resnet_scale3_CrossScene_map33_obj40_len80_test.npz'
+    # args.train_path = f'{args.input_folder}/Gazebo_Aug20th_ceil1floor02_resnet_scale3_CrossScene_map33_obj40_len80_train.npz'
+    # args.val_path = f'{args.input_folder}/Gazebo_Aug20th_ceil1floor02_resnet_scale3_CrossScene_map33_obj40_len80_test.npz'
+    args.train_path = f'{args.input_folder}/Gazebo_Aug20th_ceil1floor02_resnet_scale3_IntraScene_map33_obj40_len80_train.npz'
+    args.val_path = f'{args.input_folder}/Gazebo_Aug20th_ceil1floor02_resnet_scale3_IntraScene_map33_obj40_len80_test.npz'
 
 
     # args.out_path = f'/data1/mli170/2022_Sep20th_dataset/{args.output_folder}/{args.date}_m{args.map_size}obj{args.n_object}len{args.num_steps}angl{args.angles_intvl}/semantic'

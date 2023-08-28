@@ -147,7 +147,7 @@ def main():
 
                 # print(f'observation_After:{observation.shape}\n{observation}')
                 # print(f'obserobservation_semantic_scorevation_After:{observation_s.shape}\n{observation_s}')
-                tmp.append(np.array([np.array(position),np.array(observation),np.array(observation_s),ground_feature],dtype=object))
+                tmp.append(np.array([np.array(position),np.array(observation),np.array(observation_s),rotated_gp_feature],dtype=object))
                 #camera.append(np.array([np.array(position),np.array(image),np.array(pointcloud)],dtype=object))
                 #image = cv2.cvtColor(image.astype(np.uint8), cv2.COLOR_BGR2RGB)
                 #cv2.imwrite(base_path+'/image/%s/%d.png'%(name,n),image)

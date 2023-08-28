@@ -342,7 +342,14 @@ class Observation_System():
                         # print(f'new observation: \n{_obs}')
                         # print(f'new observation_12layer_sum: \n{np.sum(_obs,axis=0)}')
                         '''Concatenate low-level feautre to ground obervation'''
-                        _obs = np.concatenate([_obs, data[i][3][0]]) #f+1+32,h,w
+                        ground_feature = data[i][3][0] #32,h,w
+                        for i in range(len(ground_feature)):
+                            tmp = rotate(ground_feature[i], angle=180,order=1,mode='constant')
+                            ground_feature[i] = tmp
+                        _obs = np.concatenate([_obs, ground_feature]) #f+1+32,h,w
+                        # print(f'obs:{_obs}')
+                        # return
+
                         real_obs.append(_obs) # L,f+1+32,H,W
 
                         # real_abs_obs.append(np.array(data[i][1])) # L,H,W
@@ -485,7 +492,7 @@ class Observation_System():
         img, dep, obs, pos, maps, env_maps, env_smaps = gen(1,self.args.train_env)
         # print(f'img:{img.shape}, \ndep:{dep.shape}, \nobs:{obs.shape}, \npos:{pos.shape}, \nmaps:{maps.shape}, \nenv_maps:{env_maps.shape}, \nenv_smaps:{env_smaps.shape}')
         np.savez(f'{self.args.out_path}/Gazebo_{self.args.date}_CrossScene_map{self.args.map_size}_obj{self.args.n_object}_len{self.args.tra_len}_train',
-            rgb=img, depth=dep, image_cls=obs, image_cls_obst=obs, delta=pos, maps=maps, map_labl=env_maps, map_cls_labl=env_smaps)
+            rgb=img, depth=dep, image_cls=obs, delta=pos, maps=maps, map_labl=env_maps, map_cls_labl=env_smaps)
             # rgb=img, depth=dep, image_cls=obs[0], image_cls_obst=obs[1],image_cls_perf=obs[2], delta=pos, maps=maps[0],maps_obst=maps[1],maps_perf=maps[2], map_labl=env_maps, map_cls_labl=env_smaps)
 
         print('-'*20,'testing ', '-'*20,'\n')
@@ -495,7 +502,7 @@ class Observation_System():
         remainder = self.args.env_ctr - self.args.train_env 
         # print(f'img:{img.shape}, \ndep:{dep.shape}, \nobs:{obs.shape}, \npos:{pos.shape}, \nmaps:{maps.shape}, \nenv_maps:{env_maps.shape}, \nenv_smaps:{env_smaps.shape}\n')
         np.savez(f'{self.args.out_path}/Gazebo_{self.args.date}_CrossScene_map{self.args.map_size}_obj{self.args.n_object}_len{self.args.tra_len}_test',
-            rgb=img, depth=dep, image_cls=obs, image_cls_obst=obs, delta=pos, maps=maps, map_labl=env_maps, map_cls_labl=env_smaps)
+            rgb=img, depth=dep, image_cls=obs, delta=pos, maps=maps, map_labl=env_maps, map_cls_labl=env_smaps)
             # rgb=img, depth=dep, image_cls=obs[0], image_cls_obst=obs[1],image_cls_perf=obs[2], delta=pos, maps=maps[0],maps_obst=maps[1],maps_perf=maps[2], map_labl=env_maps, map_cls_labl=env_smaps)
 
         #========================Training and testing on same env==========================
